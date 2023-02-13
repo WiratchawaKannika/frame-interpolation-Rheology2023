@@ -26,21 +26,26 @@ training.learning_rate = 0.0001
 training.learning_rate_decay_steps = 750000
 training.learning_rate_decay_rate = 0.464158
 training.learning_rate_staircase = True
-training.num_steps = 3000000
+#training.num_steps = 3000000
+training.num_steps = 30000
 
 # in the sweep
-training_dataset.file = 'gs://xcloud-shared/fitsumreda/frame_interpolation/datasets/vimeo_interp_train.tfrecord@200'
-training_dataset.batch_size = 8
+#training_dataset.file = 'gs://xcloud-shared/fitsumreda/frame_interpolation/datasets/vimeo_interp_train.tfrecord@200'
+training_dataset.file = '/media/SSD/DATA_FILM/Glycerol-water-mixtures-TFRecord/GLY10P100-2-fold1/GLY10P100-2-fold1.tfrecord@200'
+#training_dataset.file = '/home/kannika/DATA_FILM/Glycerol-water-mixtures-TFRecord/GLY10P100-2-fold1/GLY10P100-2-fold1.tfrecord@200'
+training_dataset.batch_size = 4
 training_dataset.crop_size = 256
 
 eval_datasets.batch_size = 1
-eval_datasets.max_examples = -1
+#eval_datasets.max_examples = -1
+#eval_datasets.files = ['/media/SSD/DATA_FILM/Glycerol-water-mixtures-test-TFRecord/GLY10P100-2-fold1/GLY10P100-2-fold1.tfrecord@3']
 # eval_datasets.files = ['gs://xcloud-shared/fitsumreda/frame_interpolation/datasets/vimeo_interp_test.tfrecord@3',
 #                       'gs://xcloud-shared/fitsumreda/frame_interpolation/datasets/middlebury_other.tfrecord@3',
 #                       'gs://xcloud-shared/fitsumreda/frame_interpolation/datasets/UCF101_interp_test.tfrecord@2',
 #                       'gs://xcloud-shared/fitsumreda/frame_interpolation/datasets/xiph_2K.tfrecord@2',
 #                       'gs://xcloud-shared/fitsumreda/frame_interpolation/datasets/xiph_4K.tfrecord@2']
 # eval_datasets.names = ['vimeo90K', 'middlebury', 'ucf101', 'xiph2K', 'xiph4K']
+#eval_datasets.names = ['vimeo90K']
 eval_datasets.files = []
 eval_datasets.names = []
 
@@ -62,5 +67,7 @@ training_losses.loss_weight_parameters = [
 test_losses.loss_names = ['l1', 'psnr', 'ssim']
 test_losses.loss_weights = [1.0, 1.0, 1.0]
 
-vgg.vgg_model_file = 'gs://xcloud-shared/fitsumreda/frame_interpolation/pretrained_models/vgg/imagenet-vgg-verydeep-19.mat'
-style.vgg_model_file = 'gs://xcloud-shared/fitsumreda/frame_interpolation/pretrained_models/vgg/imagenet-vgg-verydeep-19.mat'
+#vgg.vgg_model_file = 'gs://xcloud-shared/fitsumreda/frame_interpolation/pretrained_models/vgg/imagenet-vgg-verydeep-19.mat'
+vgg.vgg_model_file = '/media/SSD/DATA_FILM/pretrained_models/pretrained_models/vgg/imagenet-vgg-verydeep-19.mat'
+#style.vgg_model_file = 'gs://xcloud-shared/fitsumreda/frame_interpolation/pretrained_models/vgg/imagenet-vgg-verydeep-19.mat'
+style.vgg_model_file = '/media/SSD/DATA_FILM/pretrained_models/pretrained_models/vgg/imagenet-vgg-verydeep-19.mat'

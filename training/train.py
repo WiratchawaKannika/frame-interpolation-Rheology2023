@@ -32,18 +32,33 @@ To debug the training loop on CPU:
 The training output directory will be created at <base_folder>/<label>.
 """
 import os
+import sys
+#sys.path.append(os.getcwd())
+import training.augmentation_lib as augmentation_lib
+import training.data_lib as data_lib
+import training.eval_lib as eval_lib
+#from training import metrics_lib
+import training.metrics_lib as metrics_lib
+import training.model_lib as model_lib
+import training.train_lib as train_lib
 
-from . import augmentation_lib
-from . import data_lib
-from . import eval_lib
-from . import metrics_lib
-from . import model_lib
-from . import train_lib
+# from . import augmentation_lib
+# from . import data_lib
+# from . import eval_lib
+# from . import metrics_lib
+# from . import model_lib
+# from . import train_lib
 from absl import app
 from absl import flags
 from absl import logging
 import gin.tf
-from ..losses import losses
+#from ..losses import losses
+import losses.losses as losses
+
+
+## Set tf ENV. 
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 # Reduce tensorflow logs to ERRORs only.
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'

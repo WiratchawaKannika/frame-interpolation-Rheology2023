@@ -129,11 +129,21 @@ _NUM_SHARDS = flags.DEFINE_integer('num_shards',
     default=200, # set to 3 for vimeo_test, and 200 for vimeo_train.
     help='Number of shards used for the output.')
 
+## Set tf ENV. 
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
 # Image key -> basename for frame interpolator: start / middle / end frames.
+# _INTERPOLATOR_IMAGES_MAP = {
+#     'frame_0': 'im1.png',
+#     'frame_1': 'im2.png',
+#     'frame_2': 'im3.png',
+# }
+
 _INTERPOLATOR_IMAGES_MAP = {
-    'frame_0': 'im1.png',
-    'frame_1': 'im2.png',
-    'frame_2': 'im3.png',
+    'frame_0': 'im1.jpg',
+    'frame_1': 'im2.jpg',
+    'frame_2': 'im3.jpg',
 }
 
 

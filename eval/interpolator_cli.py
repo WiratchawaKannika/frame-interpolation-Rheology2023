@@ -76,10 +76,6 @@ import mediapy as media
 import natsort
 import numpy as np
 import tensorflow as tf
-from tqdm.auto import tqdm
-
-# Controls TF_CCP log level.
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 
 
 _PATTERN = flags.DEFINE_string(
@@ -120,6 +116,10 @@ _OUTPUT_VIDEO = flags.DEFINE_boolean(
     help='If true, creates a video of the frames in the interpolated_frames/ '
     'subdirectory')
 
+## Set tf ENV. 
+os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
+
 # Add other extensions, if not either.
 _INPUT_EXT = ['png', 'jpg', 'jpeg']
 
@@ -143,8 +143,7 @@ def _output_frames(frames: List[np.ndarray], frames_dir: str):
         tf.io.gfile.remove(old_frame)
   else:
     tf.io.gfile.makedirs(frames_dir)
-  for idx, frame in tqdm(
-      enumerate(frames), total=len(frames), ncols=100, colour='green'):
+  for idx, frame in enumerate(frames):
     util.write_image(f'{frames_dir}/frame_{idx:03d}.png', frame)
   logging.info('Output frames saved in %s.', frames_dir)
 
