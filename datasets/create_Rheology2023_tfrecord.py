@@ -86,6 +86,17 @@ import apache_beam as beam
 import numpy as np
 import tensorflow as tf
 import pandas as pd
+from multiprocessing import Pool
+
+# set number of CPUs to run on
+ncore = "8"
+# set env variables
+# have to set these before importing numpy
+os.environ["OMP_NUM_THREADS"] = ncore
+os.environ["OPENBLAS_NUM_THREADS"] = ncore
+os.environ["MKL_NUM_THREADS"] = ncore
+os.environ["VECLIB_MAXIMUM_THREADS"] = ncore
+os.environ["NUMEXPR_NUM_THREADS"] = ncore
 
 
 
@@ -96,7 +107,7 @@ _INTPUT_TRIPLET_LIST_FILEPATH = flags.DEFINE_string(
 
 _OUTPUT_TFRECORD_FILEPATH = flags.DEFINE_string(
     'output_tfrecord_filepath',
-    default='/media/tohn/SSD/rheology_data/Frame_Inter_rheology2023/_3FrameFilter/TFRecord/test/test',
+    default='/media/tohn/SSD/rheology_data/Frame_Inter_rheology2023/_3FrameFilter/TFRecord-FILM/train/train',
     help='Filepath to the output TFRecord file.')
 
 _NUM_SHARDS = flags.DEFINE_integer('num_shards',
