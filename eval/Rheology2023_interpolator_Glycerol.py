@@ -66,9 +66,15 @@ _GenNum = flags.DEFINE_integer(
     default=1,
     help='Number of gen frame using FLIM Model.')
 
-## Set tf ENV. 
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+_GPU = flags.DEFINE_integer(
+    name='gpu',
+    default=0,
+    help='0,1')
+
+
+# # ## Set tf ENV. 
+# os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
+# os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
         
 def _run_interpolator() -> None:
@@ -159,6 +165,11 @@ def _run_interpolator() -> None:
 def main(argv: Sequence[str]) -> None:
   if len(argv) > 1:
     raise app.UsageError('Too many command-line arguments.')
+  # ## Set tf ENV. 
+  GPU = _GPU.value
+  GPUenv = str(GPU)
+  os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
+  os.environ["CUDA_VISIBLE_DEVICES"] = GPUenv
   _run_interpolator()
 
 
