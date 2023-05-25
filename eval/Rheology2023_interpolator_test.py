@@ -15,14 +15,14 @@
 r"""A test script for mid frame interpolation from two input frames.
 
 Usage example:
- python3 -m frame_interpolation.eval.interpolator_test \
-   --frame1 <filepath of the first frame> \
-   --frame2 <filepath of the second frame> \
-   --model_path <The filepath of the TF2 saved model to use>
+Usage example:
+(1). For Genframe Normal 
+    python3 -m eval.Rheology2023_interpolator_test --data_root /media/SSD/Frame_Inter_rheology2023/_10GenFrame/ues2Frame/pred_text/DI4000frames/origin --dataset DI4000frames --genNum 1 
 
-The output is saved to <the directory of the input frames>/output_frame.png. If
-`--output_frame` filepath is provided, it will be used instead.
+(2). For Genframe 1 Folder 
+    python3 -m eval.Rheology2023_interpolator_test --data_root /media/SSD/Frame_Inter_rheology2023/_10GenFrame/FILM_Model/Frame_Inter/DI4000frames/gen2/DI00_P100_D0_20XINF_UWELL_20230123_091248_gen2-2linedemo.txt --dataset DI4000frames --genNum 3 --genbroken 1
 """
+
 import os
 from typing import Sequence
 import glob
@@ -33,10 +33,16 @@ from absl import app
 from absl import flags
 import numpy as np
 
+
 _DATA_ROOT = flags.DEFINE_string(
     name='data_root',
     default=None,
     help='The filepath of the text input.',
+    required=True)
+_DATASET = flags.DEFINE_string(
+    name='dataset',
+    default=None,
+    help='[Saliva2, DI4000frames]',
     required=True)
 _MODEL_PATH = flags.DEFINE_string(
     name='model_path',
@@ -65,9 +71,19 @@ _GenNum = flags.DEFINE_integer(
     default=1,
     help='Number of gen frame using FLIM Model.')
 
+_Gen_Broken = flags.DEFINE_integer(name='genbroken', default=0,
+                    help='0: No gen Images Broken, 1:gen images Broken.')
+
+_GPU = flags.DEFINE_integer(
+    name='gpu',
+    default=0,
+    help='0,1')
+# GPU = _GPU.value
+# env_GPU = str(GPU)
 ## Set tf ENV. 
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+# os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
+# os.environ["CUDA_VISIBLE_DEVICES"]= "0"
+#os.environ["CUDA_VISIBLE_DEVICES"]= "1"
 
         
 def _run_interpolator() -> None:
@@ -77,12 +93,17 @@ def _run_interpolator() -> None:
       model_path=_MODEL_PATH.value,
       align=_ALIGN.value,
       block_shape=[_BLOCK_HEIGHT.value, _BLOCK_WIDTH.value])
+  GenBroken = _Gen_Broken.value
   genNum = _GenNum.value
   _genNum = f'gen{genNum}'
   genNum_old = genNum-1
   _genNumold = f'gen{genNum_old}'
+  DATASET = _DATASET.value
   data_root = _DATA_ROOT.value
-  test_demo = glob.glob(f"{data_root}/*-2linedemo.txt")
+  if GenBroken == 1:  
+     test_demo = [data_root]
+  else:
+      test_demo = glob.glob(f"{data_root}/*-2linedemo.txt")
   test_demo.sort()
   ## Read Text Files. 
   for file in test_demo: 
@@ -92,7 +113,7 @@ def _run_interpolator() -> None:
       if genNum == 1:
             folder_name_ = file.replace("-2linedemo", f"_{_genNum}-inter")
             folder_name_ = folder_name_.split('.')[0]
-            save_pathimg = folder_name_.replace("ues2Frame/pred_text/Saliva2/origin", f"FILM_Model/Frame_Inter/Saliva2/{_genNum}")
+            save_pathimg = folder_name_.replace(f"ues2Frame/pred_text/{DATASET}/origin", f"FILM_Model/Frame_Inter/{DATASET}/{_genNum}")
       else:
             folder_name_ = file.replace(f"{_genNumold}-2linedemo", f"{_genNum}-inter")
             folder_name_ = folder_name_.split('.')[0]
@@ -111,7 +132,7 @@ def _run_interpolator() -> None:
       save_csv = save_pathimg.split("/")[:-1]
       save_csv_ = '/'.join(save_csv)
       pathName_csv = save_csv_+'/'+__name_img+'_'+_genNum+'.csv'
-      _pathName_csv = pathName_csv.replace(_genNumold, f"FILM_Model/Saliva2/{_genNum}")
+      _pathName_csv = pathName_csv.replace(_genNumold, f"FILM_Model/{DATASET}/{_genNum}")
     
       ##read text files dataset
       with open(file, 'r') as txt:
@@ -158,8 +179,16 @@ def _run_interpolator() -> None:
 def main(argv: Sequence[str]) -> None:
   if len(argv) > 1:
     raise app.UsageError('Too many command-line arguments.')
+  # ## Set tf ENV. 
+  GPU = _GPU.value
+  GPUenv = str(GPU)
+  os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
+  os.environ["CUDA_VISIBLE_DEVICES"] = GPUenv
   _run_interpolator()
 
+    
 
 if __name__ == '__main__':
   app.run(main)
+
+
