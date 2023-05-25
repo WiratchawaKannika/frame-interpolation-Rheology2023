@@ -15,13 +15,12 @@
 r"""A test script for mid frame interpolation from two input frames.
 
 Usage example:
- python3 -m frame_interpolation.eval.interpolator_test \
-   --frame1 <filepath of the first frame> \
-   --frame2 <filepath of the second frame> \
-   --model_path <The filepath of the TF2 saved model to use>
+(1). For Genframe Normal 
+    python3 -m eval.Rheology2023_interpolator_Glycerol --data_root /media/SSD/Frame_Inter_rheology2023/_10GenFrame/ues2Frame/pred_text/Glycerol/GLY10 --genNum 1 
 
-The output is saved to <the directory of the input frames>/output_frame.png. If
-`--output_frame` filepath is provided, it will be used instead.
+(2). For Genframe 1 Folder 
+    python3 -m eval.Rheology2023_interpolator_Glycerol --data_root /media/SSD/Frame_Inter_rheology2023/_10GenFrame/FILM_Model/Frame_Inter/Glycerol/gen2/GLY20/GLY20P100_D0_30HZ_20XINF_UWELL_20221227_160237_gen2-2linedemo.txt --genNum 3 --genbroken 1
+
 """
 import os
 from typing import Sequence
@@ -66,6 +65,9 @@ _GenNum = flags.DEFINE_integer(
     default=1,
     help='Number of gen frame using FLIM Model.')
 
+_Gen_Broken = flags.DEFINE_integer(name='genbroken', default=0,
+                    help='0: No gen Images Broken, 1:gen images Broken.')
+
 _GPU = flags.DEFINE_integer(
     name='gpu',
     default=0,
@@ -84,12 +86,16 @@ def _run_interpolator() -> None:
       model_path=_MODEL_PATH.value,
       align=_ALIGN.value,
       block_shape=[_BLOCK_HEIGHT.value, _BLOCK_WIDTH.value])
+  GenBroken = _Gen_Broken.value
   genNum = _GenNum.value
   _genNum = f'gen{genNum}'
   genNum_old = genNum-1
   _genNumold = f'gen{genNum_old}'
   data_root = _DATA_ROOT.value
-  test_demo = glob.glob(f"{data_root}/*-2linedemo.txt")
+  if GenBroken == 1:  
+     test_demo = [data_root]
+  else:
+      test_demo = glob.glob(f"{data_root}/*-2linedemo.txt")
   test_demo.sort()
   ## Read Text Files. 
   for file in test_demo: 
