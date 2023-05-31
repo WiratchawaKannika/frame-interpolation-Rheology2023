@@ -42,7 +42,7 @@ _DATA_ROOT = flags.DEFINE_string(
 _DATASET = flags.DEFINE_string(
     name='dataset',
     default=None,
-    help='[Saliva2, DI4000frames]',
+    help='[Saliva2, DI4000frames, GLY4000frames]',
     required=True)
 _MODEL_PATH = flags.DEFINE_string(
     name='model_path',
@@ -104,6 +104,10 @@ def _run_interpolator() -> None:
      test_demo = [data_root]
   else:
       test_demo = glob.glob(f"{data_root}/*-2linedemo.txt")
+  ###***************except some folder**************************
+  a = f"{data_root}/GLY20_P100_D0_20XINF_UWELL_20230130_124732_gen2-2linedemo.txt"
+  a_ = [a]
+  test_demo = list(set(test_demo)-set(a_))   ###***************
   test_demo.sort()
   ## Read Text Files. 
   for file in test_demo: 
