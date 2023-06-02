@@ -42,7 +42,7 @@ _DATA_ROOT = flags.DEFINE_string(
 _DATASET = flags.DEFINE_string(
     name='dataset',
     default=None,
-    help='[Saliva2, DI4000frames, GLY4000frames]',
+    help='[Saliva2, DI4000frames, GLY4000frames, DINew]',
     required=True)
 _MODEL_PATH = flags.DEFINE_string(
     name='model_path',
@@ -103,11 +103,11 @@ def _run_interpolator() -> None:
   if GenBroken == 1:  
      test_demo = [data_root]
   else:
-      test_demo = glob.glob(f"{data_root}/*-2linedemo.txt")
+     test_demo = glob.glob(f"{data_root}/*-2linedemo.txt")
   ###***************except some folder**************************
-  a = f"{data_root}/GLY20_P100_D0_20XINF_UWELL_20230130_124732_gen2-2linedemo.txt"
-  a_ = [a]
-  test_demo = list(set(test_demo)-set(a_))   ###***************
+#   a = f"{data_root}/GLY20_P100_D0_20XINF_UWELL_20230130_124732_gen2-2linedemo.txt"
+#   a_ = [a]
+#   test_demo = list(set(test_demo)-set(a_))   ###***************
   test_demo.sort()
   ## Read Text Files. 
   for file in test_demo: 
@@ -163,19 +163,19 @@ def _run_interpolator() -> None:
           util.write_image(mid_frame_save, mid_frame)
           print('result saved!')
           ## append images to list. 
-          if i == len(sequence_list)-1 :
-             list_imgframe.append(pth_image_1)
-             list_imgframe.append(mid_frame_save)
-             list_imgframe.append(pth_image_2)
-          else:
-               list_imgframe.append(pth_image_1)
-               list_imgframe.append(mid_frame_save)
+#           if i == len(sequence_list)-1 :
+#              list_imgframe.append(pth_image_1)
+#              list_imgframe.append(mid_frame_save)
+#              list_imgframe.append(pth_image_2)
+#           else:
+#                list_imgframe.append(pth_image_1)
+#                list_imgframe.append(mid_frame_save)
 
-      ##save to CSV.       
-      df = pd.DataFrame(list_imgframe, columns =['seq_inter'])
-      df.to_csv(_pathName_csv)
+#       ##save to CSV.       
+#       df = pd.DataFrame(list_imgframe, columns =['seq_inter'])
+#       df.to_csv(_pathName_csv)
       print('Frame Interpolation saVe at -->>', save_pathimg)
-      print(f"Save Sequence Dataframe at -->> {_pathName_csv} With Shape: {df.shape}")
+#       print(f"Save Sequence Dataframe at -->> {_pathName_csv} With Shape: {df.shape}")
       print('*'*130)
 
 
