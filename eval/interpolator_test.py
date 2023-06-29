@@ -25,37 +25,39 @@ The output is saved to <the directory of the input frames>/output_frame.png. If
 """
 import os
 from typing import Sequence
-import glob
-import pandas as pd
+
 from . import interpolator as interpolator_lib
 from . import util
 from absl import app
 from absl import flags
 import numpy as np
 
-_DATA_ROOT = flags.DEFINE_string(
-    name='data_root',
+# Controls TF_CCP log level.
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
+
+
+_FRAME1 = flags.DEFINE_string(
+    name='frame1',
     default=None,
-    help='The filepath of the text input.',
+    help='The filepath of the first input frame.',
     required=True)
-# _FRAME1 = flags.DEFINE_string(
-#     name='frame1',
-#     default=None,
-#     help='The filepath of the first input frame.',
-#     required=True)
-# _FRAME2 = flags.DEFINE_string(
-#     name='frame2',
-#     default=None,
-#     help='The filepath of the second input frame.',
-#     required=True)
+_FRAME2 = flags.DEFINE_string(
+    name='frame2',
+    default=None,
+    help='The filepath of the second input frame.',
+    required=True)
 _MODEL_PATH = flags.DEFINE_string(
     name='model_path',
     default=None,
     help='The path of the TF2 saved model to use.')
-# _OUTPUT_FRAME = flags.DEFINE_string(
-#     name='output_frame',
-#     default=None,
-#     help='The output filepath of the interpolated mid-frame.')
+_OUTPUT_FRAME = flags.DEFINE_string(
+    name='output_frame',
+    default=None,
+    help='The output filepath of the interpolated mid-frame.')
+_MID_FRAME = flags.DEFINE_string(
+    name='mid_frame',
+    default=None,
+    help='name of the interpolated mid-frame.')
 _ALIGN = flags.DEFINE_integer(
     name='align',
     default=64,
@@ -71,11 +73,7 @@ _BLOCK_WIDTH = flags.DEFINE_integer(
     help='An int >= 1, number of patches along width, '
     'patch_width = width//block_width, should be evenly divisible.')
 
-## Set tf ENV. 
-os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"   
-os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
-        
 def _run_interpolator() -> None:
   """Writes interpolated mid frame from a given two input frame filepaths."""
 
@@ -83,65 +81,31 @@ def _run_interpolator() -> None:
       model_path=_MODEL_PATH.value,
       align=_ALIGN.value,
       block_shape=[_BLOCK_HEIGHT.value, _BLOCK_WIDTH.value])
-    
-#   mid_frame_filepath = _OUTPUT_FRAME.value
-#   if not os.path.exists(mid_frame_filepath):
-#       os.makedirs(mid_frame_filepath)
-   
-  pth = _DATA_ROOT.value
-  pathframe = pd.read_csv(pth)
-  data_path = pathframe['FolderPathDemo'].tolist()
-  
-  ##***-- Set Genarater Additional 2 Folder -- **
-#   matching_, flat_list = [], [] 
-#   Folder = ["P0100_D0_30HZ_20XINF_UWELL_20221222_174116", "P0100_D0_30HZ_20XINF_UWELL_20221222_214317"]
-#   for f in Folder:
-#       matching = [s for s in data_path if f in s]
-#       matching_.append(matching)
-#   for sublist in matching_:
-#       for item in sublist:
-#           flat_list.append(item)
-        
-  #for test_demo in data_path:
-  for test_demo in data_path:
-        print(f'On Process Folder  -->> [ {test_demo} ]')
-        ##** Set SAve path  ##-- prepare path to save images---**  
-        folder_name_ = test_demo.replace("demo", "inter")
-        folder_name_ = folder_name_.split('.')[0]
-        mid_frame_filepath = folder_name_.replace("pred_text", "Frame_Inter/FILM_Model") 
-        import imageio
-        os.makedirs(mid_frame_filepath, exist_ok=True)
-        
-  # with open(os.path.join(args.data_root, 'test-demo.txt'), 'r') as txt:
-        with open(test_demo, 'r') as txt:
-              sequence_list = [line.strip() for line in txt]
-        for seq in sequence_list:
-            pth_image_1, pth_image_2 = seq.split(' ')
-          # First batched image.
-          #image_1 = util.read_image(_FRAME1.value)
-            image_1 = util.read_image(pth_image_1)
-            image_batch_1 = np.expand_dims(image_1, axis=0)
 
-          # Second batched image.
-          #image_2 = util.read_image(_FRAME2.value)
-            image_2 = util.read_image(pth_image_2)
-            image_batch_2 = np.expand_dims(image_2, axis=0)
+  # First batched image.
+  image_1 = util.read_image(_FRAME1.value)
+  image_batch_1 = np.expand_dims(image_1, axis=0)
 
-          # Batched time.
-            batch_dt = np.full(shape=(1,), fill_value=0.5, dtype=np.float32)
+  # Second batched image.
+  image_2 = util.read_image(_FRAME2.value)
+  image_batch_2 = np.expand_dims(image_2, axis=0)
 
-          # Invoke the model for one mid-frame interpolation.
-            mid_frame = interpolator(image_batch_1, image_batch_2, batch_dt)[0]
+  # Batched time.
+  batch_dt = np.full(shape=(1,), fill_value=0.5, dtype=np.float32)
 
-          # Write interpolated mid-frame.
-            mid_frame_save = os.path.join(mid_frame_filepath, os.path.basename(pth_image_1).split('.')[0]+'_inter'+'.png')
-    #       if not mid_frame_filepath:
-    #         mid_frame_filepath = f'{os.path.dirname(_FRAME1.value)}/output_frame.png'
-          #util.write_image(mid_frame_filepath, mid_frame)
-            util.write_image(mid_frame_save, mid_frame)
-            print('result saved!')
-        print('Frame Interpolation SaVe at -->>', mid_frame_filepath)
-        print('*'*120)
+  # Invoke the model for one mid-frame interpolation.
+  mid_frame = interpolator(image_batch_1, image_batch_2, batch_dt)[0]
+
+  # Write interpolated mid-frame.
+  mid_frame_filepath = _OUTPUT_FRAME.value
+  mid_frame_name = _MID_FRAME.value
+  import imageio
+  os.makedirs(mid_frame_filepath, exist_ok=True)
+  #if not mid_frame_filepath:
+  #mid_frame_filepath = f'{os.path.dirname(_FRAME1.value)}/output_frame.png'
+  mid_frame_filepath = f'{mid_frame_filepath}/{mid_frame_name}.jpg' 
+  util.write_image(mid_frame_filepath, mid_frame)
+
 
 def main(argv: Sequence[str]) -> None:
   if len(argv) > 1:
@@ -151,3 +115,5 @@ def main(argv: Sequence[str]) -> None:
 
 if __name__ == '__main__':
   app.run(main)
+
+
